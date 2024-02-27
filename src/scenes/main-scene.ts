@@ -12,6 +12,12 @@ export default class MainScene extends Phaser.Scene {
     private enemySpawnner: Spawnner<Enemy> | undefined;
     private keys: Phaser.Types.Input.Keyboard.CursorKeys | undefined;
     private player: Player | undefined;
+
+    constructor()
+    {
+        super({ key: "main" });
+    }
+
     public preload(): void
     {
         this.load.bitmapFont("font", "./src/assets/font.png",  "./src/assets/font.xml");
@@ -72,8 +78,15 @@ export default class MainScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.enemySpawnner.group,
             (player, enemy) =>
             {
+                if(!this.player) return;
+
+                const realEnemy = <Enemy> enemy;
+                const x = this.player.x-realEnemy.x;
+                const y = this.player.y-realEnemy.y;
+
                 this.cameras.main.shake(180, 0.072, true);
-                enemy.destroy();
+                realEnemy.die();
+                this.player?.receiveDamage(1, Math.atan2(y, x)*(180/Math.PI));
             }
         );
         this.physics.world.setBoundsCollision(true, true, false, true);

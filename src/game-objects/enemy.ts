@@ -33,4 +33,29 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
         this.getBody().setAllowGravity(false);
         this.getBody().setVelocity(velocityX, velocityY)
     }
+    public die(): void
+    {
+        const center = this.getBody().center;
+        const emitter = this.scene.add.particles(center.x, center.y, this.texture, {
+            accelerationX: {
+                onEmit: ()=> (Math.random()-0.5)*100
+            },
+            accelerationY: {
+                onEmit: ()=> (Math.random()-0.5)*100
+            },
+            scale: {
+                start: 0.6,
+                end: 0.05
+            },
+            rotate: {
+                onEmit: ()=> Math.random()*(Math.PI*2),
+                steps: Math.random()*0.1
+            },
+            frequency: 5,
+            duration: 80
+        });
+
+        emitter.start();
+        this.destroy(true);
+    }
 }

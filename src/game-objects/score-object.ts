@@ -2,7 +2,7 @@ export default class ScoreObject extends Phaser.GameObjects.Rectangle {
 
     constructor(scene: Phaser.Scene, x: number, y: number)
     {
-        super(scene, x, y, 2, 2, 0xFFFFFF, 1);
+        super(scene, x, y, 2, 2, 0xFFFF11, 1);
         this.setPhysics();
     }
     private getBody(): Phaser.Physics.Arcade.Body

@@ -2,7 +2,7 @@ import State from "./state";
 
 export default class StateMachine<T, U extends State<T>> {
 
-    private currentState: U | undefined;
+    private _currentState: U | undefined;
     public readonly states = new Map<string, U>();
     public constructor()
     {
@@ -19,7 +19,15 @@ export default class StateMachine<T, U extends State<T>> {
     public enterState(key: string)
     {
         this.currentState?.exit();
-        this.currentState = this.states.get(key);
+        this._currentState = this.states.get(key);
         this.currentState?.enter();
+    }
+    public isInState(state: State<T>)
+    {
+        return state === this.currentState;
+    }
+    public get currentState()
+    {
+        return this._currentState;
     }
 }

@@ -1,0 +1,12 @@
+[X] - particles on enemy die
+[X] - health
+[X] - health feedback
+[] - title screen
+[X] - game over screen
+[] - pause screen
+[] - mobile support
+[] - music
+[] - sound on die
+[] - sound on collect score
+[] - sound on hit
+[] - player death feedback

@@ -1,33 +1,37 @@
-import PlayerStates from "../../util/player-states";
-import PlayerState from "../player-state";
+import Player from "../../game-objects/player";
+import MobilePlayerState from "./mobile";
+import handleJumpFromKeyboard from "./util/jump-from-keyboard";
 
-export default class IdlePlayerState extends PlayerState {
+export default class IdlePlayerState extends MobilePlayerState {
 
     public update(delta: number): void
     {
         const velocity = this.player.getBody().velocity.x;
+        const intervalMultiplier = delta/(1000/60);
 
         super.update(delta);
-        if(!this.player.isCollidingBottom()) return;
-        if(Math.abs(velocity)>0.85) this.player.setFrame(5);
+        this.player.getBody().velocity.x*=0.955*intervalMultiplier;
+        if(Math.abs(velocity)>0.92) this.player.setFrame(5);
         else                        this.player.setFrame(0);
     }
     public enter(): void
     {
-        if(this.player.isCollidingBottom()) this.player.setFrame(0);
-        else                                this.player.setFrame(2);
+        const input = this.player.scene.input;
+
+        this.player.resistence = Player.GROUND_RESISTENCE;
+        this.player.setFrame(0);
         this.player.getBody().setAcceleration(0, 0);
+        input.keyboard?.on("keydown", this.handleKeyDown);
     }
     public exit(): void
     {
-        
+        const input = this.player.scene.input;
+
+        input.keyboard?.off("keydown", this.handleKeyDown);
     }
-    public handleInput(keys: Phaser.Types.Input.Keyboard.CursorKeys): void
+
+    private handleKeyDown = (e: KeyboardEvent): void =>
     {
-        if(keys.left.isDown)  this.player.enterState(PlayerStates.RUNNING_LEFT);
-        if(keys.right.isDown) this.player.enterState(PlayerStates.RUNNING_RIGHT);
-        if(keys.space.isDown&&this.player.isCollidingBottom())
-            this.player.enterState(PlayerStates.JUMPING);
+        handleJumpFromKeyboard(e, this.player);
     }
-    
 }

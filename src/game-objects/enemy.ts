@@ -1,6 +1,6 @@
 export default class Enemy extends Phaser.GameObjects.Sprite {
 
-    private time = 0;
+    private time = Math.random()*360;
     private static readonly SPEED = 30;
     constructor(scene: Phaser.Scene, x: number, y: number, texture: string, directionAngle: number)
     {
@@ -10,12 +10,12 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
     }
     update(delta: number): void
     {
-        const angle = this.time*100;
+        const angle = this.time*(Math.PI/180);
         const sin = Math.sin(angle);
-        const y = sin*150;
+        const y = sin*Enemy.SPEED;
 
-        this.time+=delta*100*(Math.random()*0.6+0.4);
-        this.getBody().setAccelerationY(y);
+        this.time+=delta*(Math.random()*0.4);
+        this.getBody().setVelocityY(y);
     }
     private getBody(): Phaser.Physics.Arcade.Body
     {

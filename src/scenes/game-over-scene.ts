@@ -1,6 +1,6 @@
 export default class GameOverScene extends Phaser.Scene {
 
-    private static readonly TEXT = "GAME OVER\n\n\n-click-";
+    private static readonly TEXT = "GAME\nOVER\n\n-click-";
     private gameOverText: Phaser.GameObjects.BitmapText | undefined;
 
     public constructor()

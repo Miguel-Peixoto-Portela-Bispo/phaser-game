@@ -9,4 +9,5 @@
 [] - sound on die
 [] - sound on collect score
 [] - sound on hit
-[] - player death feedback
+[X] - player death feedback
+[] - scene transition

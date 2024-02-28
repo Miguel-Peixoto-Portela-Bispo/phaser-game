@@ -32,29 +32,31 @@ export default class MainScene extends Phaser.Scene {
     }
     public create(): void
     {
+        this.keys = this.input.keyboard?.createCursorKeys();
         this.scoreSpawnner = new ScoreSpawnner(this, 1000, 2000);
-        this.enemySpawnner = new EnemySpawnner(this, "enemy", 500, 1500);
+        this.enemySpawnner = new EnemySpawnner(this, "enemy", 2000, 3000);
         this.player = this.createPlayer();
-        this.add.existing(this.player);
+        if(this.player) this.add.existing(this.player);
         this.scoreText = this.createScoreText();
         this.updateScoreText();
         this.setPhysics();
-        this.keys = this.input.keyboard?.createCursorKeys();
     }
     public update(time: number, delta: number): void
     {
         this.enemySpawnner?.update(delta);
         this.enemySpawnner?.updateGroup(delta);
         this.scoreSpawnner?.update(delta);
-        if(this.keys) this.player?.update(delta, this.keys);
+        if(this.keys) this.player?.update(delta);
     }
-    private createPlayer(): Player
+    private createPlayer(): Player | undefined
     {
+        if(!this.keys) return;
+        
         const bounds = this.physics.world.bounds;
         const x = bounds.centerX-8/2;
         const y = bounds.top;
 
-        return new Player(this, x, y, "player");
+        return new Player(this, x, y, "player", this.keys);
     }
     private createScoreText(): Phaser.GameObjects.BitmapText
     {
@@ -70,6 +72,7 @@ export default class MainScene extends Phaser.Scene {
             (player, score)=>
             {
                 if(!this.player) return;
+                
                 score.destroy(true);
                 this.player.score++;
                 this.updateScoreText();

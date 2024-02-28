@@ -1,45 +1,52 @@
 import PlayerState from "../state/player-state";
+import DeadPlayerState from "../state/player-states/dead";
 import IdlePlayerState from "../state/player-states/idle";
 import InStunPlayerState from "../state/player-states/in-stun";
-import JumpingPlayerState from "../state/player-states/jumping";
-import RunningLeftPlayerState from "../state/player-states/running-left";
-import RunningRightPlayerState from "../state/player-states/running-right";
+import JumpingPlayerState from "../state/player-states/rising";
+import MovingLeftPlayerState from "../state/player-states/moving-left";
+import MovingRightPlayerState from "../state/player-states/moving-right";
 import StateMachine from "../state/state-machine";
 import PlayerStates from "../util/player-states";
+import FallingPlayerState from "../state/player-states/falling";
+import State from "../state/state";
 
-type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys;
-const PlayerStateMachine = StateMachine<CursorKeys, PlayerState>;
+const PlayerStateMachine = StateMachine<PlayerState>;
 
 export default class Player extends Phaser.GameObjects.Sprite {
 
     private static readonly MAX_INVINCIBLE_TIME = 2000;
+
     public static readonly SPEED = 105;
     public static readonly ANIMATION_NAME = "anim";
+    public static readonly AIR_RESISTENCE = 0.935;
+    public static readonly GROUND_RESISTENCE = 0.955
 
     private maxHealthPoints = 3;
     private healthPoints = this.maxHealthPoints;
     private readonly stateMachine =  new PlayerStateMachine();
-    private invincible = true;
+    private invincible = false;
     private invincibilityTimer = 0;
     private invincibleFramesTimer = 0;
 
     public score = 0;
     public knockBackAngle = 0;
+    public keys: Phaser.Types.Input.Keyboard.CursorKeys;
+    public resistence = 1;
 
-    public constructor(scene: Phaser.Scene, x: number, y: number, spritesheet: string)
+    public constructor(scene: Phaser.Scene, x: number, y: number, spritesheet: string, keys: Phaser.Types.Input.Keyboard.CursorKeys)
     {
         super(scene, x, y, spritesheet);
         this.createAnim(spritesheet);
         this.setPhysics();
         this.initStates();
         this.setOrigin(0, 0);
+        this.keys = keys;
     }
 
-    public update(delta: number, keys: Phaser.Types.Input.Keyboard.CursorKeys): void
+    public update(delta: number): void
     {
-        this.handleInvinciblity(delta);
-        this.stateMachine.handleInput(keys);
         this.stateMachine.update(delta);
+        this.handleInvinciblity(delta);
         this.checkDeath();
     }
     public enterState(stateName: PlayerStates)
@@ -59,12 +66,17 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
     public receiveDamage(damage: number, knockBackAngle: number)
     {
-        if(this.invincible) return;
+        
+        if(this.invincible||this.isInDeadState) return;
 
         this.invincible = true;
         this.healthPoints = Math.max(0, this.healthPoints-damage);
         this.knockBackAngle = knockBackAngle;
         this.enterState(PlayerStates.IN_STUN);
+    }
+    public isInState(state: State)
+    {
+        return this.stateMachine.currentState === state;
     }
 
     private setPhysics()
@@ -88,10 +100,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         const states = this.stateMachine.states;
 
         states.set(PlayerStates.IDLE, new IdlePlayerState(this));
-        states.set(PlayerStates.RUNNING_LEFT, new RunningLeftPlayerState(this));
-        states.set(PlayerStates.RUNNING_RIGHT, new RunningRightPlayerState(this));
-        states.set(PlayerStates.JUMPING, new JumpingPlayerState(this));
+        states.set(PlayerStates.MOVING_LEFT, new MovingLeftPlayerState(this));
+        states.set(PlayerStates.MOVING_RIGHT, new MovingRightPlayerState(this));
+        states.set(PlayerStates.RISING, new JumpingPlayerState(this));
+        states.set(PlayerStates.FALLING, new FallingPlayerState(this));
         states.set(PlayerStates.IN_STUN, new InStunPlayerState(this));
+        states.set(PlayerStates.DEAD, new DeadPlayerState(this));
 
         this.enterState(PlayerStates.IDLE);
     }
@@ -115,11 +129,14 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
     private checkDeath(): void
     {
-        if(this.healthPoints>0) return;
+        if(this.isInDeadState||this.healthPoints>0) return;
 
-        const sceneManager = this.scene.game.scene;
+        this.enterState(PlayerStates.DEAD);
+    }
+    private get isInDeadState()
+    {
+        const state = this.stateMachine.states.get(PlayerStates.DEAD);
 
-        sceneManager.stop("main");
-        sceneManager.start("over");
+        return state&&this.stateMachine.isInState(state);
     }
 }

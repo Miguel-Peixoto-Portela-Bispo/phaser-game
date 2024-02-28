@@ -1,23 +1,22 @@
 import Player from "../game-objects/player";
+import getIntervalMultiplier from "../util/get-interval-multiplier";
 import State from "./state";
 
-type CursorKeys = Phaser.Types.Input.Keyboard.CursorKeys;
-
-export default abstract class PlayerState extends State<CursorKeys> {
+export default abstract class PlayerState implements State {
 
     protected player: Player;
-    constructor(player: Player)
+
+    public constructor(player: Player)
     {
-        super();
         this.player = player;
     }
+
     public update(delta: number): void
     {
-        let velocityMultplier = 0;
-        const intervalMultiplier = delta/(1000/60);
+        const multiplier = getIntervalMultiplier(delta);
 
-        if(this.player.isCollidingBottom()) velocityMultplier = 0.965*intervalMultiplier;
-        else                                velocityMultplier = 0.975*intervalMultiplier;
-        this.player.getBody().velocity.x*=velocityMultplier;
+        this.player.getBody().velocity.x*=this.player.resistence*multiplier;
     }
+    public abstract enter(): void;
+    public abstract exit(): void;
 }

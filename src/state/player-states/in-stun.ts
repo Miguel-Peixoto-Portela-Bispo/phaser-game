@@ -4,10 +4,14 @@ import PlayerState from "../player-state";
 export default class InStunPlayerState extends PlayerState {
     private static readonly KNOCK_BACK_FORCE = 150;
     private static readonly MAX_TIME = 800;
+
     private timer = 0;
+    
     public update(delta: number)
     {
-        super.update(delta);
+        const intervalMultiplier = delta/(1000/60);
+
+        this.player.getBody().velocity.x*=0.945*intervalMultiplier;
         this.handleTimer(delta);
     }
     public enter(): void
@@ -18,14 +22,8 @@ export default class InStunPlayerState extends PlayerState {
         this.player.getBody().setVelocity(vec.x, vec.y);
         this.player.setFrame(5);
     }
-    public exit(): void
-    {
-        
-    }
-    public handleInput(input: Phaser.Types.Input.Keyboard.CursorKeys): void
-    {
-
-    }
+    public exit(): void {}
+    
     private getKnockBackVector(): Phaser.Math.Vector2
     {
         const angle = this.player.knockBackAngle*(Math.PI/180);
@@ -45,6 +43,4 @@ export default class InStunPlayerState extends PlayerState {
             this.player.enterState(PlayerStates.IDLE);
         }
     }
-
-    
 }

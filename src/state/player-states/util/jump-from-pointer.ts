@@ -4,8 +4,10 @@ import PointerUtil from "../../../util/pointer-util";
 
 export default function handleJumpFromPointer(pointerUtil: PointerUtil, player: Player): void
 {
-    if(!pointerUtil.isSwiping(20, 160)) return;
+    const min = 20;
+    const max = 160;
+    
+    if(!pointerUtil.isSwiping(min*-1+360, max*-1+360)) return;
 
     player.enterState(PlayerStates.RISING);
-    console.log("aaa")
 }

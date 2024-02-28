@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import MainScene from "./scenes/main-scene";
 import GameOverScene from "./scenes/game-over-scene";
 
-const game = new Phaser.Game({
+new Phaser.Game({
     scene: [GameOverScene, MainScene],
     pixelArt: true,
     width: 64,

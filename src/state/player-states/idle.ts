@@ -1,6 +1,7 @@
 import Player from "../../game-objects/player";
 import MobilePlayerState from "./mobile";
 import handleJumpFromKeyboard from "./util/jump-from-keyboard";
+import handleJumpFromPointer from "./util/jump-from-pointer";
 
 export default class IdlePlayerState extends MobilePlayerState {
 
@@ -22,16 +23,23 @@ export default class IdlePlayerState extends MobilePlayerState {
         this.player.setFrame(0);
         this.player.getBody().setAcceleration(0, 0);
         input.keyboard?.on("keydown", this.handleKeyDown);
+        input.on("pointermove", this.handlePointerMove);
     }
     public exit(): void
     {
         const input = this.player.scene.input;
 
         input.keyboard?.off("keydown", this.handleKeyDown);
+        input.off("pointermove", this.handlePointerMove);
     }
 
     private handleKeyDown = (e: KeyboardEvent): void =>
     {
         handleJumpFromKeyboard(e, this.player);
+    }
+
+    protected handlePointerMove = (): void =>
+    {
+        handleJumpFromPointer(this.pointerUtil, this.player);
     }
 }

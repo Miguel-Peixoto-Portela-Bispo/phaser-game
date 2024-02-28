@@ -1,11 +1,16 @@
+import toDegrees from "./to-degrees";
+
 export default class PointerUtil {
 
-    private static readonly TRESH_HOLD = 40;
+    private static readonly TRESH_HOLD = 20;
+    private static readonly MINIMUN_CLICK_DELAY = 350;
+
     private lastClickTime = 0;
     private swipeStart: Phaser.Math.Vector2 | null = new Phaser.Math.Vector2(0, 0);
     private readonly scene: Phaser.Scene;
     private swipeAngle = 0;
     private swipeLength = 0;
+    private taps = 0;
 
     public constructor(scene: Phaser.Scene)
     {
@@ -17,11 +22,13 @@ export default class PointerUtil {
 
     public checkDoubleTap(): boolean
     {
+        if(!this.scene.input.pointer1.isDown) return false;
+
         const now = this.scene.time.now;
         const delay = now-this.lastClickTime;
 
-        this.lastClickTime = now;
-        return delay<200;
+        if(delay>PointerUtil.MINIMUN_CLICK_DELAY) this.taps = 1;
+        return this.taps>=2;
     }
     public madeSwipe(minAngle: number, maxAngle: number): boolean
     {
@@ -29,7 +36,7 @@ export default class PointerUtil {
     }
     public hasSwipe(minAngle: number, maxAngle: number): boolean
     {
-        const realAngle = this.getRealAngle();
+        const realAngle = toDegrees(this.swipeAngle);
 
         return realAngle>=minAngle&&realAngle<=maxAngle&&this.swipeLength>=PointerUtil.TRESH_HOLD;
     }
@@ -37,13 +44,7 @@ export default class PointerUtil {
     {
         return this.hasSwipe(minAngle, maxAngle)&&this.swipeStart!==null;
     }
-    private getRealAngle(): number
-    {
-        const angleInDegrees = this.swipeAngle*(180/Math.PI);
-        const result = angleInDegrees*-1+360
 
-        return result;
-    }
     private handleMove(): void
     {
         if(!this.swipeStart) return;
@@ -56,7 +57,13 @@ export default class PointerUtil {
     }
     private handleDown(): void
     {
+        const now = this.scene.time.now;
+        const delay = now-this.lastClickTime;
+
         this.swipeStart = this.scene.input.pointer1.position.clone();
+        if(delay<PointerUtil.MINIMUN_CLICK_DELAY) this.taps++;
+        else          this.taps = 1;
+        this.lastClickTime = now;
     }
     private handleUp(): void
     {

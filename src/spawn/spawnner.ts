@@ -2,8 +2,8 @@ import getRandomNumber from "../util/get-random-number";
 
 export default abstract class Spawnner<T extends Phaser.GameObjects.GameObject> {
 
-    protected readonly maxTime: number;
-    protected readonly minTime: number;
+    protected maxTime: number;
+    protected minTime: number;
     protected randomTime: number;
     protected timer: number;
     protected readonly _group: Phaser.GameObjects.Group;
@@ -31,12 +31,20 @@ export default abstract class Spawnner<T extends Phaser.GameObjects.GameObject> 
         this.group.children.iterate(
             (obj) =>
             {
-                obj.update(delta)
-                
+                obj?.update(delta)
                 return true;
             }
         );
     }
+    public decreaseMinimumTime(amount: number)
+    {
+        this.minTime-=amount;
+    }
+    public decreaseMaximumTime(amount: number)
+    {
+        this.maxTime-=amount;
+    }
+
     protected abstract create(): T;
     protected spawn(): void
     {

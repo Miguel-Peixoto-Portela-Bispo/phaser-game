@@ -8,12 +8,6 @@ export default class FallingPlayerState extends MobilePlayerState {
         super.update(delta);
         if(this.player.isCollidingBottom()) this.player.enterState(PlayerStates.IDLE);
     }
-    public enter(): void
-    {
-        
-    }
-    public exit(): void
-    {
-        
-    }
+    public enter(): void {}
+    public exit(): void {}
 }

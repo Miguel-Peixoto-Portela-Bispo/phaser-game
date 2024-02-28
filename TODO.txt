@@ -4,7 +4,7 @@
 [] - title screen
 [X] - game over screen
 [] - pause screen
-[] - mobile support
+[X] - mobile support
 [] - music
 [] - sound on die
 [] - sound on collect score

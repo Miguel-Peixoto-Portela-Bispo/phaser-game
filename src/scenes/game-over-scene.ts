@@ -10,7 +10,7 @@ export default class GameOverScene extends Phaser.Scene {
 
     public preload(): void
     {
-        this.load.bitmapFont("font", "./src/assets/font.png",  "./src/assets/font.xml");
+        this.load.bitmapFont("font", "/font.png",  "font.xml");
     }
     public create(): void
     {

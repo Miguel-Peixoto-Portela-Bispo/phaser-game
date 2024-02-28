@@ -1,9 +1,11 @@
 import Enemy from "../game-objects/enemy";
 import Player from "../game-objects/player";
+import Projectile from "../game-objects/projectile";
 import ScoreObject from "../game-objects/score-object";
 import EnemySpawnner from "../spawn/enemy-spawnner";
 import ScoreSpawnner from "../spawn/score-spawnner";
 import Spawnner from "../spawn/spawnner";
+import toDegrees from "../util/to-degrees";
 
 export default class MainScene extends Phaser.Scene {
 
@@ -20,12 +22,12 @@ export default class MainScene extends Phaser.Scene {
 
     public preload(): void
     {
-        this.load.bitmapFont("font", "./src/assets/font.png",  "./src/assets/font.xml");
-        this.load.spritesheet("player", "./src/assets/player.png", {
+        this.load.bitmapFont("font", "/font.png",  "/font.xml");
+        this.load.spritesheet("player", "/player.png", {
             frameWidth: 8,
             frameHeight: 8
         });
-        this.load.spritesheet("enemy", "./src/assets/enemy.png", {
+        this.load.spritesheet("enemy", "/enemy.png", {
             frameWidth: 8,
             frameHeight: 8
         });
@@ -41,12 +43,15 @@ export default class MainScene extends Phaser.Scene {
         this.updateScoreText();
         this.setPhysics();
     }
-    public update(time: number, delta: number): void
+    public update(_: number, delta: number): void
     {
         this.enemySpawnner?.update(delta);
         this.enemySpawnner?.updateGroup(delta);
         this.scoreSpawnner?.update(delta);
+        this.scoreSpawnner?.updateGroup(delta);
         if(this.keys) this.player?.update(delta);
+        this.enemySpawnner?.decreaseMinimumTime(1/45);
+        this.enemySpawnner?.decreaseMaximumTime(1/60);
     }
     private createPlayer(): Player | undefined
     {
@@ -69,7 +74,7 @@ export default class MainScene extends Phaser.Scene {
         if(!this.player||!this.scoreSpawnner||!this.enemySpawnner) return;
 
         this.physics.add.overlap(this.player, this.scoreSpawnner.group,
-            (player, score)=>
+            (_, score)=>
             {
                 if(!this.player) return;
                 
@@ -79,19 +84,20 @@ export default class MainScene extends Phaser.Scene {
             }
         );
         this.physics.add.overlap(this.player, this.enemySpawnner.group,
-            (player, enemy) =>
+            (_, enemy) =>
             {
                 if(!this.player) return;
 
                 const realEnemy = <Enemy> enemy;
                 const x = this.player.x-realEnemy.x;
                 const y = this.player.y-realEnemy.y;
+                const angle = Math.atan2(y, x)*(180/Math.PI);
 
-                this.cameras.main.shake(180, 0.072, true);
                 realEnemy.die();
-                this.player?.receiveDamage(1, Math.atan2(y, x)*(180/Math.PI));
+                this.player?.receiveDamage(1, angle);
             }
         );
+        this.events.on("enemy-spawnned", this.addEnemyProjectilesOverlap, this);
         this.physics.world.setBoundsCollision(true, true, false, true);
     }
     private updateScoreText(): void
@@ -100,5 +106,26 @@ export default class MainScene extends Phaser.Scene {
 
         this.scoreText?.setText("score:\n"+this.player.score.toString());
         this.scoreText?.setX(this.cameras.main.centerX-this.scoreText.width/2);
+    }
+    private addEnemyProjectilesOverlap(e: Enemy)
+    {
+        if(!this.player) return true;
+        
+        console.log(e.x)
+        this.physics.add.overlap(this.player, e.spawnner.group,
+            (_, p) =>
+            {
+                if(!this.player) return;
+
+                const projectile = <Projectile>p;
+                const x = this.player.x-projectile.x;
+                const y = this.player.y-projectile.y;
+                const angle = toDegrees(Math.atan2(y, x));
+
+                projectile.destroy(true);
+                this.player?.receiveDamage(1, angle);
+            }
+        )
+        return true;
     }
 }

@@ -69,6 +69,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         
         if(this.invincible||this.isInDeadState) return;
 
+        this.scene.cameras.main.shake(180, 0.072, true);
         this.invincible = true;
         this.healthPoints = Math.max(0, this.healthPoints-damage);
         this.knockBackAngle = knockBackAngle;
@@ -107,11 +108,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
         states.set(PlayerStates.IN_STUN, new InStunPlayerState(this));
         states.set(PlayerStates.DEAD, new DeadPlayerState(this));
 
-        this.enterState(PlayerStates.IDLE);
+        this.enterState(PlayerStates.FALLING);
     }
     private handleInvinciblity(delta: number)
     {
-        if(!this.invincible) return;
+        if(!this.invincible||this.healthPoints<=0) return;
 
         this.invincibilityTimer+=delta;
         this.invincibleFramesTimer+=delta;
@@ -132,6 +133,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         if(this.isInDeadState||this.healthPoints>0) return;
 
         this.enterState(PlayerStates.DEAD);
+
     }
     private get isInDeadState()
     {

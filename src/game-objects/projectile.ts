@@ -1,6 +1,6 @@
 export default class Projectile extends Phaser.GameObjects.Rectangle {
 
-    private static readonly SPEED = 100;
+    private static readonly SPEED = 80;
     private static readonly MAX_LIFE_TIME = 10_000;
 
     private readonly DIRECTION_ANGLE: number;

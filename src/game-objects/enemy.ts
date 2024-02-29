@@ -1,5 +1,6 @@
 import EnemyProjectileSpawnner from "../spawn/enemy-projectile-spawnner";
 import getIntervalMultiplier from "../util/get-interval-multiplier";
+import Player from "./player";
 
 export default class Enemy extends Phaser.GameObjects.Sprite {
 
@@ -8,22 +9,23 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
 
     private time = Math.random()*360;
 
-    public readonly spawnner = new EnemyProjectileSpawnner(this, 100, 900);
+    public readonly spawnner = new EnemyProjectileSpawnner(this, 100, 500);
+    public readonly target: Player;
 
-    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, directionAngle: number)
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string, directionAngle: number, target: Player)
     {
         super(scene, x, y, texture);
         this.setPhysics(directionAngle);
         this.setOrigin(0, 0);
         this.depth = 99;
+        this.target = target;
     }
     update(delta: number): void
     {
         this.time+=delta*(Math.random()*0.4+0.1);
         this.setVelocity(delta);
         this.checkDeath();
-        this.spawnner.update(delta);
-        this.spawnner.updateGroup(delta);
+        this.updateAttack(delta);
     }
     private getBody(): Phaser.Physics.Arcade.Body
     {
@@ -79,5 +81,17 @@ export default class Enemy extends Phaser.GameObjects.Sprite {
         if(!(this.time>=Enemy.MAX_LIFE_TIME)) return;
         
         this.die();
+    }
+    private updateAttack(delta: number)
+    {
+        const targetPosition = this.target.getBody().position.clone();
+        const enemyPosition = this.getBody().position.clone();
+        const differenceVector = targetPosition.subtract(enemyPosition);
+        const distance = differenceVector.length();
+
+        if(distance>24) return;
+
+        this.spawnner.update(delta);
+        this.spawnner.updateGroup(delta);
     }
 }

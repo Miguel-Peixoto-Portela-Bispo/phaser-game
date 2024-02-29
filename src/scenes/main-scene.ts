@@ -1,5 +1,7 @@
 import fontImage from "/font.png";
 import fontData from "/font.xml";
+import playerSheet from "/player.png";
+import enemyTexture from "/enemy.png";
 
 import Enemy from "../game-objects/enemy";
 import Player from "../game-objects/player";
@@ -9,6 +11,7 @@ import EnemySpawnner from "../spawn/enemy-spawnner";
 import ScoreSpawnner from "../spawn/score-spawnner";
 import Spawnner from "../spawn/spawnner";
 import toDegrees from "../util/to-degrees";
+import getIntervalMultiplier from "../util/get-interval-multiplier";
 
 export default class MainScene extends Phaser.Scene {
 
@@ -32,11 +35,11 @@ export default class MainScene extends Phaser.Scene {
     public preload(): void
     {
         this.load.bitmapFont(MainScene.FONT_NAME, fontImage,  fontData);
-        this.load.spritesheet(MainScene.PLAYER_SHEET_NAME, "./player.png", {
+        this.load.spritesheet(MainScene.PLAYER_SHEET_NAME, playerSheet, {
             frameWidth: 8,
             frameHeight: 8
         });
-        this.load.spritesheet(MainScene.ENEMY_TEXTURE_NAME, "./enemy.png", {
+        this.load.spritesheet(MainScene.ENEMY_TEXTURE_NAME, enemyTexture, {
             frameWidth: 8,
             frameHeight: 8
         });
@@ -44,9 +47,9 @@ export default class MainScene extends Phaser.Scene {
     public create(): void
     {
         this.keys = this.input.keyboard?.createCursorKeys();
-        this.scoreSpawnner = new ScoreSpawnner(this, 1000, 2000);
-        this.enemySpawnner = new EnemySpawnner(this, MainScene.ENEMY_TEXTURE_NAME, 2000, 3000);
         this.player = this.createPlayer();
+        this.scoreSpawnner = this.createScoreSpawnner();
+        this.enemySpawnner = this.createEnemySpawnner();
         if(this.player) this.add.existing(this.player);
         this.scoreText = this.createScoreText();
         this.updateScoreText();
@@ -54,13 +57,16 @@ export default class MainScene extends Phaser.Scene {
     }
     public update(_: number, delta: number): void
     {
+        const increasingDifficultyRate = 60;
+        const increasingDifficultyAmount = increasingDifficultyRate/100;
+
         this.enemySpawnner?.update(delta);
         this.enemySpawnner?.updateGroup(delta);
         this.scoreSpawnner?.update(delta);
         this.scoreSpawnner?.updateGroup(delta);
-        if(this.keys) this.player?.update(delta);
-        this.enemySpawnner?.decreaseMinimumTime(1/45);
-        this.enemySpawnner?.decreaseMaximumTime(1/60);
+        this.player?.update(delta);
+        this.enemySpawnner?.decreaseMinimumTime(increasingDifficultyAmount*getIntervalMultiplier(delta));
+        this.enemySpawnner?.decreaseMaximumTime(increasingDifficultyAmount*getIntervalMultiplier(delta));
     }
     private createPlayer(): Player | undefined
     {
@@ -136,5 +142,15 @@ export default class MainScene extends Phaser.Scene {
             }
         )
         return true;
+    }
+    private createEnemySpawnner(): EnemySpawnner | undefined
+    {
+        if(!this.player) return undefined;
+
+        return new EnemySpawnner(this, MainScene.ENEMY_TEXTURE_NAME, this.player, 2000);
+    }
+    private createScoreSpawnner(): ScoreSpawnner | undefined
+    {
+        return new ScoreSpawnner(this, 1000, 2000);
     }
 }

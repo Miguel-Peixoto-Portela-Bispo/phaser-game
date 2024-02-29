@@ -17,7 +17,11 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+        "@/*": ["./public/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "files" : ["./src/vite-env.d.ts"]
 }

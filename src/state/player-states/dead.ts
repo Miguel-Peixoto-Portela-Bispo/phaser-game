@@ -1,3 +1,5 @@
+import GameOverScene from "../../scenes/game-over-scene";
+import MainScene from "../../scenes/main-scene";
 import PlayerState from "../player-state";
 
 export default class DeadPlayerState extends PlayerState {
@@ -25,8 +27,8 @@ export default class DeadPlayerState extends PlayerState {
             const sceneManager = this.player.scene.game.scene;
 
             this.timer = 0;
-            sceneManager.stop("main");
-            sceneManager.start("over");
+            sceneManager.stop(MainScene.MAIN_SCENE_KEY);
+            sceneManager.start(GameOverScene.GAME_OVER_SCENE_KEY);
         }
     }
     public exit(): void

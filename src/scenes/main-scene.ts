@@ -1,3 +1,6 @@
+import fontImage from "/font.png";
+import fontData from "/font.xml";
+
 import Enemy from "../game-objects/enemy";
 import Player from "../game-objects/player";
 import Projectile from "../game-objects/projectile";
@@ -9,6 +12,12 @@ import toDegrees from "../util/to-degrees";
 
 export default class MainScene extends Phaser.Scene {
 
+    public static readonly MAIN_SCENE_KEY = "main";
+
+    private static readonly FONT_NAME = "main-font-main-scene";
+    private static readonly PLAYER_SHEET_NAME = "player";
+    private static readonly ENEMY_TEXTURE_NAME = "enemy";
+
     private scoreText: Phaser.GameObjects.BitmapText | undefined;
     private scoreSpawnner: Spawnner<ScoreObject> | undefined;
     private enemySpawnner: Spawnner<Enemy> | undefined;
@@ -17,17 +26,17 @@ export default class MainScene extends Phaser.Scene {
 
     constructor()
     {
-        super({ key: "main" });
+        super({ key: MainScene.MAIN_SCENE_KEY });
     }
 
     public preload(): void
     {
-        this.load.bitmapFont("font", "/font.png",  "/font.xml");
-        this.load.spritesheet("player", "/player.png", {
+        this.load.bitmapFont(MainScene.FONT_NAME, fontImage,  fontData);
+        this.load.spritesheet(MainScene.PLAYER_SHEET_NAME, "./player.png", {
             frameWidth: 8,
             frameHeight: 8
         });
-        this.load.spritesheet("enemy", "/enemy.png", {
+        this.load.spritesheet(MainScene.ENEMY_TEXTURE_NAME, "./enemy.png", {
             frameWidth: 8,
             frameHeight: 8
         });
@@ -36,7 +45,7 @@ export default class MainScene extends Phaser.Scene {
     {
         this.keys = this.input.keyboard?.createCursorKeys();
         this.scoreSpawnner = new ScoreSpawnner(this, 1000, 2000);
-        this.enemySpawnner = new EnemySpawnner(this, "enemy", 2000, 3000);
+        this.enemySpawnner = new EnemySpawnner(this, MainScene.ENEMY_TEXTURE_NAME, 2000, 3000);
         this.player = this.createPlayer();
         if(this.player) this.add.existing(this.player);
         this.scoreText = this.createScoreText();
@@ -61,13 +70,13 @@ export default class MainScene extends Phaser.Scene {
         const x = bounds.centerX-8/2;
         const y = bounds.top;
 
-        return new Player(this, x, y, "player", this.keys);
+        return new Player(this, x, y, MainScene.PLAYER_SHEET_NAME, this.keys);
     }
     private createScoreText(): Phaser.GameObjects.BitmapText
     {
         const y = this.cameras.main.centerY/2;
 
-        return this.add.bitmapText(0, y, "font", "", 8, 1);
+        return this.add.bitmapText(0, y, MainScene.FONT_NAME, "", 8, 1);
     }
     private setPhysics(): void
     {
